@@ -18,7 +18,17 @@ processor core, on the slave machines.
 
 .. note::
     Both the master and each slave machine, must have a copy of the locust test scripts 
-    when running Locust distributed.
+    when running Locust distributed. 
+
+.. note::
+    It's recommended that you start a number of simulated users that are greater  than 
+    ``number of locust classes * number of slaves`` when running Locust distributed. 
+    
+    Otherwise - due to the current implementation - 
+    you might end up with a distribution of the  Locust classes that doesn't correspond to the 
+    Locust classes' ``weight`` attribute. And if the hatch rate is lower than the number of slave 
+    nodes, the hatching would occur in "bursts" where all slave node would hatch a single user and 
+    then sleep for multiple seconds, hatch another user, sleep and repeat.
 
 
 Example
@@ -91,3 +101,10 @@ Running Locust distributed without the web UI
 =============================================
 
 See :ref:`running-locust-distributed-without-web-ui`
+
+
+Increase Locust's performance
+=============================
+
+If your planning to run large-scale load tests you might be interested to use the alternative 
+HTTP client that's shipped with Locust. You can read more about it here: :ref:`increase-performance`

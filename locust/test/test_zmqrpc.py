@@ -3,16 +3,21 @@ from time import sleep
 import zmq
 from locust.rpc import zmqrpc, Message
 
-PORT = 5557
 
 class ZMQRPC_tests(unittest.TestCase):
     def setUp(self):
-        self.server = zmqrpc.Server('*', PORT)
-        self.client = zmqrpc.Client('localhost', PORT, 'identity')
+        self.server = zmqrpc.Server('*', 0)
+        self.client = zmqrpc.Client('localhost', self.server.port, 'identity')
 
     def tearDown(self):
         self.server.socket.close()
         self.client.socket.close()
+
+    def test_constructor(self):
+        self.assertEqual(self.server.socket.getsockopt(zmq.TCP_KEEPALIVE), 1)
+        self.assertEqual(self.server.socket.getsockopt(zmq.TCP_KEEPALIVE_IDLE), 30)
+        self.assertEqual(self.client.socket.getsockopt(zmq.TCP_KEEPALIVE), 1)
+        self.assertEqual(self.client.socket.getsockopt(zmq.TCP_KEEPALIVE_IDLE), 30)
 
     def test_client_send(self):
         self.client.send(Message('test', 'message', 'identity'))
@@ -30,3 +35,9 @@ class ZMQRPC_tests(unittest.TestCase):
         self.assertEqual(msg.type, 'test')
         self.assertEqual(msg.data, 'message')
         self.assertEqual(msg.node_id, 'identity')
+
+    def test_client_retry(self):
+        server = zmqrpc.Server('0.0.0.0', 8888)
+        server.socket.close()
+        with self.assertRaises(zmq.error.ZMQError):
+            server.recv_from_client()

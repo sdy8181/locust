@@ -41,7 +41,7 @@ def consistent():
     gevent.sleep(0.2)
     return "This is a consistent response"
 
-@app.route("/request_method", methods=["POST", "GET", "HEAD", "PUT", "DELETE"])
+@app.route("/request_method", methods=["POST", "GET", "HEAD", "PUT", "DELETE", "PATCH"])
 def request_method():
     return request.method
 
@@ -57,6 +57,10 @@ def manipulate():
 @app.route("/fail")
 def failed_request():
     return "This response failed", 500
+
+@app.route("/status/204")
+def status_204():
+    return "", 204
 
 @app.route("/redirect", methods=["GET", "POST"])
 def do_redirect():

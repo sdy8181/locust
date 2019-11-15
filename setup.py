@@ -20,7 +20,7 @@ setup(
     long_description="""Locust is a python utility for doing easy, distributed load testing of a web site""",
     classifiers=[
         "Topic :: Software Development :: Testing :: Traffic Generation",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
@@ -30,6 +30,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",
     ],
@@ -41,7 +42,15 @@ setup(
     packages=find_packages(exclude=['examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=["gevent>=1.2.2", "flask>=0.10.1", "requests>=2.9.1", "msgpack>=0.4.2", "six>=1.10.0", "pyzmq>=16.0.2"],
+    install_requires=[
+        "gevent>=1.2.2", 
+        "flask>=0.10.1", 
+        "requests>=2.9.1", 
+        "msgpack-python>=0.4.2", 
+        "six>=1.10.0", 
+        "pyzmq>=16.0.2", 
+        "geventhttpclient-wheels==1.3.1.dev2",
+    ],
     test_suite="locust.test",
     tests_require=['mock'],
     entry_points={
