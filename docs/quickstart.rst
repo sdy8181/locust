@@ -1,162 +1,103 @@
-=============
-Quick start
-=============
+.. _quickstart:
 
-Example locustfile.py
-=====================
+===============
+Getting started
+===============
 
-Below is a quick little example of a simple **locustfile.py**:
-
+A Locust test is essentially a Python program. This makes it very flexible and particularly good at implementing complex user flows. But it can do simple tests as well, so lets start with that:
 
 .. code-block:: python
 
-    from locust import HttpLocust, TaskSet, between
+    from locust import HttpUser, task
 
-    def login(l):
-        l.client.post("/login", {"username":"ellen_key", "password":"education"})
+    class HelloWorldUser(HttpUser):
+        @task
+        def hello_world(self):
+            self.client.get("/hello")
+            self.client.get("/world")
 
-    def logout(l):
-        l.client.post("/logout", {"username":"ellen_key", "password":"education"})
+This user will make HTTP requests to ``/hello``, and then ``/world``, again and again. For a full explanation and a more realistic example see :ref:`writing-a-locustfile`.
 
-    def index(l):
-        l.client.get("/")
-
-    def profile(l):
-        l.client.get("/profile")
-
-    class UserBehavior(TaskSet):
-        tasks = {index: 2, profile: 1}
-
-        def on_start(self):
-            login(self)
-
-        def on_stop(self):
-            logout(self)
-
-    class WebsiteUser(HttpLocust):
-        task_set = UserBehavior
-        wait_time = between(5.0, 9.0)
-
-
-Here we define a number of Locust tasks, which are normal Python callables that take one argument 
-(a :py:class:`Locust <locust.core.Locust>` class instance). These tasks are gathered under a
-:py:class:`TaskSet <locust.core.TaskSet>` class in the *tasks* attribute. Then we have a
-:py:class:`HttpLocust <locust.core.HttpLocust>` class which represents a user, where we define how
-long a simulated user should wait between executing tasks, as well as what
-:py:class:`TaskSet <locust.core.TaskSet>` class should define the user's \"behaviour\". 
-:py:class:`TaskSet <locust.core.TaskSet>` classes can be nested.
-
-The :py:class:`HttpLocust <locust.core.HttpLocust>` class inherits from the
-:py:class:`Locust <locust.core.Locust>` class, and it adds a client attribute which is an instance of
-:py:class:`HttpSession <locust.clients.HttpSession>` that can be used to make HTTP requests.
-
-By default, we stop looking for proxy settings to improve performance. If you really want the test requests
-go through a HTTP proxy, you can inherit from the :py:class:`HttpLocust <locust.core.HttpLocust>` class and
-set the trust_env field to True. For further details, refer to the documentation of requests.
-
-Another way we could declare tasks, which is usually more convenient, is to use the
-``@task`` decorator. The following code is equivalent to the above:
-
-.. code-block:: python
-
-    from locust import HttpLocust, TaskSet, task, between
-
-    class UserBehavior(TaskSet):
-        def on_start(self):
-            """ on_start is called when a Locust start before any task is scheduled """
-            self.login()
-
-        def on_stop(self):
-            """ on_stop is called when the TaskSet is stopping """
-            self.logout()
-        
-        def login(self):
-            self.client.post("/login", {"username":"ellen_key", "password":"education"})
-        
-        def logout(self):
-            self.client.post("/logout", {"username":"ellen_key", "password":"education"})
-        
-        @task(2)
-        def index(self):
-            self.client.get("/")
-        
-        @task(1)
-        def profile(self):
-            self.client.get("/profile")
-    
-    class WebsiteUser(HttpLocust):
-        task_set = UserBehavior
-        wait_time = between(5, 9)
-
-The :py:class:`Locust <locust.core.Locust>` class (as well as :py:class:`HttpLocust <locust.core.HttpLocust>`
-since it's a subclass) also allows one to specify the wait time between the execution of tasks 
-(:code:`wait_time = between(5, 9)`) as well as other user behaviours.
-With the between function the time is randomly chosen uniformly between the specified min and max values, 
-but any user-defined time distributions can be used by setting *wait_time* to any arbitrary function. 
-For example, for an exponentially distributed wait time with average of 1 second:
-
-.. code-block:: python
-
-    import random
-    
-    class WebsiteUser(HttpLocust):
-        task_set = UserBehaviour
-        wait_time = lambda self: random.expovariate(1)*1000
-
-
-Start Locust
-============
-
-To run Locust with the above Locust file, if it was named *locustfile.py* and located in the current working
-directory, we could run:
+Put the code in a file named *locustfile.py* in your current directory and run ``locust``:
 
 .. code-block:: console
+    :substitutions:
 
     $ locust
+    [2021-07-24 09:58:46,215] .../INFO/locust.main: Starting web interface at http://*:8089
+    [2021-07-24 09:58:46,285] .../INFO/locust.main: Starting Locust |version|
 
+Locust's web interface
+==============================
 
-If the Locust file is located under a subdirectory and/or named different than *locustfile.py*, specify
-it using ``-f``:
+Once you've started Locust, open up a browser and point it to http://localhost:8089. You will be greeted with something like this:
 
-.. code-block:: console
+.. image:: images/webui-splash-screenshot.png
 
-    $ locust -f locust_files/my_locust_file.py
+| 
+| Point the test to your own web server and try it out!
 
+The following screenshots show what it might look like when running this test targeting 40 concurrent users with a ramp up speed of 0.5 users/s, pointed it to a server that responds to ``/hello`` and ``/world``.
 
-To run Locust distributed across multiple processes we would start a master process by specifying
-``--master``:
+.. image:: images/webui-running-statistics.png
 
-.. code-block:: console
+Locust can also visualize the results as charts, showing things like requests per second (RPS):
 
-    $ locust -f locust_files/my_locust_file.py --master
+.. image:: images/total_requests_per_second.png
 
+Response times (in milliseconds):
+    
+.. image:: images/response_times.png
 
-and then we would start an arbitrary number of slave processes:
+Number of users:
 
-.. code-block:: console
-
-    $ locust -f locust_files/my_locust_file.py --slave
-
-
-If we want to run Locust distributed on multiple machines we would also have to specify the master host when
-starting the slaves (this is not needed when running Locust distributed on a single machine, since the master
-host defaults to 127.0.0.1):
-
-.. code-block:: console
-
-    $ locust -f locust_files/my_locust_file.py --slave --master-host=192.168.0.100
-
+.. image:: images/number_of_users.png
 
 .. note::
 
-    To see all available options type: ``locust --help``
+    Interpreting performance test results is quite complex (and mostly out of scope for this manual), but if your graphs start looking like this, the most likely reason is that your target service/system cannot handle the load you are hitting it with (it is overloaded or "saturated")
+
+    The clearest sign of this is that when we get to around 9 users, response times start increasing so fast that the requests per second-curve flattens out, even though new users are still being added.
+
+    If you're having trouble generating enough load to saturate your system, or need some pointers on how to start digging into a server side problem have a look at the `Locust FAQ  <https://github.com/locustio/locust/wiki/FAQ#increase-my-request-raterps>`_
 
 
-Open up Locust's web interface
-==============================
+Direct command line usage / headless
+====================================
 
-Once you've started Locust using one of the above command lines, you should open up a browser
-and point it to http://127.0.0.1:8089 (if you are running Locust locally). Then you should be
-greeted with something like this:
+Using the Locust web UI is entirely optional. You can supply the load parameters on command line and get reports on the results in text form:
 
-.. image:: images/webui-splash-screenshot.png
+.. code-block:: console
+    :substitutions:
+
+    $ locust --headless --users 10 --spawn-rate 1 -H http://your-server.com
+    [2021-07-24 10:41:10,947] .../INFO/locust.main: No run time limit set, use CTRL+C to interrupt.
+    [2021-07-24 10:41:10,947] .../INFO/locust.main: Starting Locust |version|
+    [2021-07-24 10:41:10,949] .../INFO/locust.runners: Ramping to 10 users using a 1.00 spawn rate
+    Name              # reqs      # fails  |     Avg     Min     Max  Median  |   req/s failures/s
+    ----------------------------------------------------------------------------------------------
+    GET /hello             1     0(0.00%)  |     115     115     115     115  |    0.00    0.00
+    GET /world             1     0(0.00%)  |     119     119     119     119  |    0.00    0.00
+    ----------------------------------------------------------------------------------------------
+    Aggregated             2     0(0.00%)  |     117     115     119     117  |    0.00    0.00
+    (...)
+    [2021-07-24 10:44:42,484] .../INFO/locust.runners: All users spawned: {"HelloWorldUser": 10} (10 total users)
+    (...)
+
+See :ref:`running-without-web-ui` for more details.
+
+More options
+============
+
+To run Locust distributed across multiple Python processes or machines, you can start a single Locust master process 
+with the ``--master`` command line parameter, and then any number of Locust worker processes using the ``--worker`` 
+command line parameter. See :ref:`running-distributed` for more info.
+
+Parameters can also be set through :ref:`environment variables <environment-variables>`, or in a
+:ref:`config file <configuration-file>`.
+
+To see all available options type: ``locust --help`` or check :ref:`configuration`.
+
+|
+
+Now, lets have a more in-depth look at locustfiles and what they can do: :ref:`writing-a-locustfile`

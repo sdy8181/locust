@@ -4,10 +4,516 @@ Changelog Highlights
 
 For full details of the Locust changelog, please see https://github.com/locustio/locust/blob/master/CHANGELOG.md
 
-0.13.0
+2.8.3
+=====
+
+* Ensure users are distributed evently across hosts during ramp up https://github.com/locustio/locust/pull/2025 
+
+2.8.2
+=====
+
+* Fix issue with permissions in docker image
+
+2.8.1
+=====
+
+* Further optimize docker image (60MB compressed)
+
+2.8.0
+=====
+
+* Shrink docker image significantly (95MB compressed size for x64 instead of 358MB) by basing the image on python3-slim instead of python3 
+* Fix empty tasks section in UI and static report bug (really) https://github.com/locustio/locust/pull/2001
+
+2.7.3
+=====
+
+* Fix 'Tasks' section remains empty in web ui https://github.com/locustio/locust/pull/1997
+
+2.7.2
+=====
+
+* Fix an issue introduced in 2.7.1 that caused Locust to shut down when the UI stop was clicked https://github.com/locustio/locust/pull/1996
+
+2.7.1
+=====
+* fix --html report in web mode https://github.com/locustio/locust/pull/1992
+
+2.7.0
+=====
+
+* Add run_single_user and documentation on how to debug Users/locustfiles https://github.com/locustio/locust/pull/1985
+* Fix "socket operation on non-socket" at shutdown, by reverting #1935 https://github.com/locustio/locust/pull/1991
+* Fixing issue with incorrect "All users spawned" log messages https://github.com/locustio/locust/pull/1977
+
+2.6.1
+=====
+
+* Documentation fixes only.
+
+2.6.0
+=====
+* Pass --tags and --exclude-tags to workers. (https://github.com/locustio/locust/pull/1976)
+* Clean up some logging messages (https://github.com/locustio/locust/pull/1973)
+* Ensure heartbeat\_worker doesnt try to re-establish connection to workers when quit has been called (https://github.com/locustio/locust/pull/1972)
+* fixed\_count: ability to spawn a specific number of users \(as opposed to just using weights\) (https://github.com/locustio/locust/pull/1964)
+
+2.5.1
+=====
+
+* Ignore empty host field in web ui (Fix running the web UI with class defined hosts) (https://github.com/locustio/locust/pull/1956)
+* Throw exception when calling response.success()/.failure() if with-block has not been entered (https://github.com/locustio/locust/pull/1955)
+* Stop declaring "fake" class level variables in Environment, User and StatsEntry (https://github.com/locustio/locust/pull/1948)
+
+2.5.0
+=====
+
+* Change request event 'url' parameter to contain full URL (technically a breaking change, but very few users will have had time to start using this) (https://github.com/locustio/locust/issues/1927)
+* Suppress warnings for patch version mismatch between master and worker (https://github.com/locustio/locust/issues/1926)
+
+2.4.3
+=====
+
+* Fix crash on windows (https://github.com/locustio/locust/issues/1924)
+
+2.4.2
+=====
+
+* Add --expect-workers-max-wait parameter (https://github.com/locustio/locust/pull/1922)
+* Track worker memory usage (https://github.com/locustio/locust/pull/1917)
+* Other small fixes
+
+2.4.1
+=====
+
+* Fix stat printing when using shapes (https://github.com/locustio/locust/pull/1907)
+
+2.4.0
+=====
+
+* Add start_time and url parameters to request event. (https://github.com/locustio/locust/pull/1900)
+* Support (and test) Python 3.10 (https://github.com/locustio/locust/pull/1901)
+* Make User.run/TaskSet.run final and raise an exception if someone marks it as a task (https://github.com/locustio/locust/pull/1895)
+* Release docker image for arm64. (https://github.com/locustio/locust/pull/1889)
+* Automated change log generation is broken. Will fix this later, but until then you can look here: https://github.com/locustio/locust/compare/2.2.3...2.4.0
+
+2.3.0
+=====
+
+* Accidentally increased version to 2.4 directly so there is no 2.3...
+
+2.2.3
+=====
+
+* Fix issue with custom arguments in config file (when not running headless) (https://github.com/locustio/locust/pull/1888)
+* Automated change log generation is broken. Will fix this later, but until then you can look here: https://github.com/locustio/locust/compare/2.2.2...2.2.3
+
+2.2.2
+=====
+
+* Fix version in Docker builds
+* Automated change log generation is broken. Will fix this later, but until then you can look here: https://github.com/locustio/locust/compare/2.2.1...2.2.2
+
+2.2.1
+=====
+
+* Automated change log generation is broken. Will fix this later, but until then you can look here: https://github.com/locustio/locust/compare/2.2.0...2.2.1
+
+2.2.0
+=====
+
+* Display locustfile and tasks ratio information on index.html
+* Add --autostart and --autoquit parameters (https://github.com/locustio/locust/pull/1864)
+* Add constant\_throughput wait time \(the inverse of constant\_pacing\)
+* Alternative way to rename requests (particularly useful when using an SDK that wraps `requests`) (https://github.com/locustio/locust/pull/1858)
+* Add --equal-weights flag (https://github.com/locustio/locust/pull/1842)
+* HttpUser: Unpack known exceptions
+* Various charting fixes
+* Add FastHttpUser directly under locust package
+* Auto-generate Locust's version number using setuptools\_scm and git tags 
+* Show custom arguments in web ui and forward them to worker (https://github.com/locustio/locust/pull/1841)
+
+2.1.0
+=====
+
+* Fix docker builds (2.0 never got pushed to Docker Hub)
+* Bump dependency on pyzmq to fix out of memory issue on Windows
+* Use 1 as default for user count and spawn rate in web UI start form
+* Various documentation updates
+
+2.0.0
+=====
+
+User ramp up/down and User type selection is now controlled by the master instead of autonomously by the workers 
+----------------------------------------------------------------------------------------------------------------
+This has allowed us to fix some issues with incorrect/skewed User type selection and undesired stepping of ramp up. The issues were especially visible when running many workers and/or using LoadShape:s. This change also allows redistribution of Users if a worker disconnects during a test. This is a major change internally in Locust so please let us know if you encounter any problems (particularly regarding ramp up pace, User distribution, CPU usage on master, etc)
+
+Other potentially breaking API changes
+--------------------------------------
+* Change the default User weight to 1 instead of 10 (the old default made no sense)
+* Fire test_start and test_stop events on workers too (previously they were only fired on master/standalone instances)
+* Workers now send their version number to master. Master will warn about version differences, and pre 2.0-versions will not be allowed to connect at all (because they would not work anyway)
+* Update Flask dependency to 2.0
+
+Significant merged PR:s (and prerelease version they were introduced in)
+------------------------------------------------------------------------
+* Allow workers to bypass version check by sending -1 as version (2.0.0) https://github.com/locustio/locust/pull/1830
+* Improve logging messages and clean up code after dispatch refactoring (2.0.0b4) https://github.com/locustio/locust/pull/1826
+* Remove `user_classes_count` from heartbeat payload (2.0.0b4) https://github.com/locustio/locust/pull/1825
+* Add option to set concurrency of FastHttpUser/Session (2.0.0b3) https://github.com/locustio/locust/pull/1812/
+* Fire test_start and test_stop events on worker nodes (2.0.0b3) https://github.com/locustio/locust/pull/1777/
+* Auto shrink request stats table to fit terminal (2.0.0b2) https://github.com/locustio/locust/pull/1811
+* Refactoring of the dispatch logic to improve performance (2.0.0b2) https://github.com/locustio/locust/pull/1809 
+* Check version of workers when they connect. Warn if there is a mismatch, refuse 1.x workers to connect (2.0.0b1) https://github.com/locustio/locust/pull/1805 
+* Change the default User weight to 1 instead of 10 (2.0.0b1) https://github.com/locustio/locust/pull/1803
+* Upgrade to Flask 2 (2.0.0b1) https://github.com/locustio/locust/pull/1764
+* Move User selection responsibility from worker to master in order to fix unbalanced distribution of users and uneven ramp-up (2.0.0b0) https://github.com/locustio/locust/pull/1621
+
+Some of these are not really that significant and may be removed from this list at a later time, once 2.0 has stabilised.
+
+1.6.0
+=====
+
+* Allow cross process communication using custom messages https://github.com/locustio/locust/pull/1782
+* Fix: status "stopped" instead of "spawning", tick\(\) method of LoadShape called only once https://github.com/locustio/locust/pull/1769
+
+1.5.3
+=====
+
+* Fix an issue with custom Users calling request_success/_failure.fire() not being added to statistics https://github.com/locustio/locust/pull/1761
+
+1.5.2
+=====
+
+* Pin version of flask to 1.1.2, fixing https://github.com/locustio/locust/issues/1759
+* Fix issue with GRPC compatibility and add GRPC example to documentation https://github.com/locustio/locust/pull/1755
+* Use time.perf_counter() to calculate elapsed times everywhere, should only matter for Windows https://github.com/locustio/locust/pull/1758
+
+1.5.1
+=====
+
+* Fixed an issue with 1.5.0 where an extra parameter (start_time) was passed to request event https://github.com/locustio/locust/pull/1754
+
+1.5.0
+=====
+
+* Unify request_success/request_failure into a single event called request (the old ones are deprecated but still work) https://github.com/locustio/locust/issues/1724
+* Add the response object and context as parameters to the request event. context is used to forward information to the request event handler (can be used for things like username, tags etc)
+
+1.4.4
+=====
+
+* Ensure runner.quit finishes even when users are broken https://github.com/locustio/locust/pull/1728
+* Make runner / user count available to LoadTestShape https://github.com/locustio/locust/pull/1719
+* Other small fixes
+
+1.4.3
+=====
+
+* Fix bug that broke the tooltips for charts in the Web UI 
+
+1.4.2
+=====
+
+* Multiple improvements for charting including tooltips etc
+* Added --html option to save HTML report https://github.com/locustio/locust/pull/1637
+* Lots of other small fixes
+
+1.4.1
+=====
+
+* Fix 100% cpu usage when running in docker/non-tty terminal https://github.com/locustio/locust/issues/1629
+
+1.4.0
+=====
+
+* You can now control user count from terminal while the test is running https://github.com/locustio/locust/pull/1612
+* Infinite run time is now the default for command line runs https://github.com/locustio/locust/pull/1625
+* wait_time now defaults to zero https://github.com/locustio/locust/pull/1626
+
+1.3.2
+=====
+
+* List Python 3.9 as supported in the package/on PyPi
+* Fix XSS vulnerability in the web UI (sounds important but really isn't, as Locust UI is not meant to be exposed to outside users)
+
+1.3.1
+=====
+
+* Bump minimum required gevent version to 20.9.0 (latest), as the previous ones had sneaky binary incompatibilities with the latest version of greenlet ("RuntimeWarning: greenlet.greenlet size changed, may indicate binary incompatibility. Expected 144 from C header, got 152 from PyObject")
+
+1.3.0
+=====
+
+* Breaking change: Remove step-load feature (now that we have LoadTestShape it is no longer needed)
+* More type hints to enable better code completion and linting of locustfiles
+
+Bug fixes: 
+
+* LoadTestShape.get\_run\_time is not relative to start of test https://github.com/locustio/locust/issues/1557
+* Refactor and fix delayed user stopping in combination with on\_stop https://github.com/locustio/locust/pull/1560
+* runner.quit gets blocked by slow on stop https://github.com/locustio/locust/issues/1552
+* Remove legacy code that was only needed for py2
+* Lots more
+
+1.2.3
+=====
+
+* Bug fix (TypeError: code() takes at least 14 arguments (13 given) (Werkzeug version issue) https://github.com/locustio/locust/issues/1545)
+* Bug fix (Locust stuck in "Shape worker starting" when restarting a test from the webUI https://github.com/locustio/locust/issues/1540)
+* Various linting fixes that *should* have no functional impact
+
+1.2.2
+=====
+
+* Bug fix (LoadTestShape in headless mode https://github.com/locustio/locust/pull/1539)
+
+1.2.1
+=====
+
+* Bug fix (StatsEntry.use_response_times_cache must be set to True, https://github.com/locustio/locust/issues/1531)
+
+1.2
+===
+
+* Rename hatch rate to spawn rate (the --hatch-rate parameter is only deprecated, but the hatch_complete event has been renamed spawning_complete)
+* Ability to generate any custom load shape with LoadTestShape class
+* Allow ramping down of users
+* Ability to use save custom percentiles
+* Improve command line stats output
+* Bug fixes (excessive precision of metrics in losust csv stats, negative response time when system clock has changed, issue with non-string failure messages, some typos etc)
+* Documentation improvements
+
+1.1.1
+=====
+
+* --run-time flag is not respected if there is an exception in a test_stop listener
+* FastHttpUser: Handle stream ended at an unexpected time and UnicodeDecodeError. Show bad/error status codes on failures page.
+* Improve logging when locust master port is busy
+
+1.1
+===
+
+* The official Docker image is now based on the ``python:3.8`` image instead of ``python:3.8-alpine``. This should 
+  make it easier to install other python packages when extending the locust docker image.
+* Allow Users to stop the runner by calling self.environment.runner.quit() (without deadlocking sometimes)
+* Cut to only 5% free space on the top of the graphs
+* Use csv module to generate csv data (solves issues with sample names that need escaping in csv)
+* Various documentation improvements
+
+1.0.3
+=====
+
+* Ability to control the exit code of the Locust process by setting :py:attr:`Environment.process_exit_code <locust.env.Environment.process_exit_code>`
+* FastHttpLocust: Change dependency to use original geventhttpclient (now that releases can be made there) instead of geventhttpclient-wheels
+* Fix search on readthedocs
+
+1.0.2
+=====
+
+* Check for low open files limit (ulimit) and try to automatically increase it from within the locust process.
+* Other various bug fixes as improvements
+
+
+.. _changelog-1-0:
+
+1.0, 1.0.1
 ==========
 
+This version contains some breaking changes.
+
+Locust class renamed to User
+----------------------------
+
+We've renamed the ``Locust`` and ``HttpLocust`` classes to ``User`` and ``HttpUser``. The ``locust`` attribute on 
+:py:class:`TaskSet <locust.TaskSet>` instances has been renamed to :py:attr:`user <locust.TaskSet.user>`.
+
+The parameter for setting number of users has also been changed, from ``-c`` / ``--clients`` to ``-u`` / ``--users``.
+
+Ability to declare @task directly under the ``User`` class
+----------------------------------------------------------
+
+It's now possible to declare tasks directly under a User class like this:
+
+.. code-block:: python
+
+    class WebUser(User):
+        @task
+        def some_task(self):
+            pass
+
+In tasks declared under a User class (e.g. ``some_task`` in the example above), ``self`` refers to the User 
+instance, as one would expect. For tasks defined under a :py:class:`TaskSet <locust.TaskSet>` class, ``self`` 
+would refer to the ``TaskSet`` instance.
+
+The ``task_set`` attribute on the ``User`` class (previously ``Locust`` class) has been removed. To declare a 
+``User`` class with a single ``TaskSet`` one would now use the the :py:attr:`tasks <locust.User.tasks>` 
+attribute instead:
+
+.. code-block:: python
+
+    class MyTaskSet(TaskSet):
+        ...
+    
+    class WebUser(User):
+        tasks = [MyTaskSet]
+
+
+Task tagging
+------------
+
+A new :ref:`tag feature <tagging-tasks>` has been added that makes it possible to include/exclude tasks during 
+a test run.
+
+Tasks can be tagged using the :py:func:`@tag <locust.tag>` decorator:
+
+.. code-block:: python
+
+    class WebUser(User):
+        @task
+        @tag("tag1", "tag2")
+        def my_task(self):
+            ...
+
+And tasks can then be specified/excluded using the ``--tags``/``-T`` and ``--exclude-tags``/``-E`` command line arguments. 
+
+
+Environment variables changed
+-----------------------------
+
+The following changes has been made to the configuration environment variables
+
+* ``LOCUST_MASTER`` has been renamed to ``LOCUST_MODE_MASTER`` (in order to make it less likely to get variable name collisions 
+  when running Locust in Kubernetes/K8s which automatically adds environment variables depending on service/pod names).
+* ``LOCUST_SLAVE`` has been renamed to ``LOCUST_MODE_WORKER``.
+* ``LOCUST_MASTER_PORT`` has been renamed to ``LOCUST_MASTER_NODE_PORT``.
+* ``LOCUST_MASTER_HOST`` has been renamed to ``LOCUST_MASTER_NODE_HOST``.
+* ``CSVFILEBASE`` has been renamed to ``LOCUST_CSV``.
+
+See the :ref:`configuration` documentation for a full list of available :ref:`environment variables <environment-variables>`.
+
+
+Other breaking changes
+----------------------
+
+* The master/slave terminology has been changed to master/worker. Therefore the command line arguments ``--slave`` and
+  ``--expect-slaves`` has been renamed to ``--worker`` and ``--expect-workers``.
+* The option for running Locust without the Web UI has been renamed from ``--no-web`` to ``--headless``.
+* Removed ``Locust.setup``, ``Locust.teardown``, ``TaskSet.setup`` and ``TaskSet.teardown`` hooks. If you want to 
+  run code at the start or end of a test, you should instead use the :py:attr:`test_start <locust.event.Events.test_start>`
+  and :py:attr:`test_stop <locust.event.Events.test_stop>` events:
+  
+  .. code-block:: python
+  
+      from locust import events
+      
+      @events.test_start.add_listener
+      def on_test_start(**kw):
+          print("test is starting")
+        
+      @events.test_stop.add_listener
+      def on_test_start(**kw):
+          print("test is stopping")
+* ``TaskSequence`` and ``@seq_task`` has been replaced with :ref:`SequentialTaskSet <sequential-taskset>`.
+* A ``User count`` column has been added to the history stats CSV file. The column order and column names has been changed.
+* The official docker image no longer uses a shell script with a bunch of special environment variables to configure how 
+  how locust is started. Instead, the ``locust`` command is now set as ``ENTRYPOINT`` of the docker image. See
+  :ref:`running-in-docker` for more info.
+* Command line option ``--csv-base-name`` has been removed, since it was just an alias for ``--csv``.
+* The way Locust handles logging has been changed. We no longer wrap stdout (and stderr) to automatically make print 
+  statements go into the log. ``print()`` statements now only goes to stdout. To add custom entries to the log, one 
+  should now use the Python logging module:
+  
+  .. code-block:: python
+  
+      import logging
+      logging.info("custom logging message)
+  
+  For more info see :ref:`logging`
+
+
+Web UI improvements
+-------------------
+
+* It's now possible to protect the Web UI with Basic Auth using hte ``--web-auth`` command line argument.
+* The Web UI can now be served over HTTPS by specifying a TLS certificate and key with the ``--tls-cert`` 
+  and ``--tls-key`` command line arguments.
+* If the number of users and hatch rate are specified on command line, it's now used to pre-populate the input fields in 
+  the Web UI.
+
+
+
+Other fixes and improvements
+----------------------------
+
+* Added ``--config`` command line option for specifying a :ref:`configuration file <configuration-file>` path
+* The code base has been refactored to make it possible to run :ref:`Locust as a python lib <use-as-lib>`. 
+* It's now possible to call ``response.failure()`` or ``response.success()`` multiple times when using 
+  the ``catch_response=True`` in the HTTP clients. Only the last call to ``success``/``failure`` will count.
+* The ``--help`` output has been improved by grouping related options together.
+
+
+
+0.14.6
+======
+
+* Fix bug when running with latest Gevent version, and pinned the latest version
+
+
+0.14.0
+======
+
+* Drop Python 2 and Python 3.5 support!
+* Continuously measure CPU usage and emit a warning if we get a five second average above 90%
+* Show CPU usage of slave nodes in the Web UI
+* Fixed issue when running Locust distributed and new slave nodes connected during the hatching/ramp-up 
+  phase (https://github.com/locustio/locust/issues/1168)
+
+
+0.13.5
+======
+
+Various minor fixes, mainly regarding FastHttpLocust.
+
+0.13.4
+======
+
+Identical to previous version, but now built & deployed to Pypi using Travis.
+
+0.13.3
+======
+
+* Unable to properly connect multiple slaves - https://github.com/locustio/locust/issues/1176
+* Zero exit code on exception - https://github.com/locustio/locust/issues/1172
+* `--stop-timeout` is not respected when changing number of running Users in distributed mode - https://github.com/locustio/locust/issues/1162
+
+0.13.2
+======
+
+* Fixed bug that broke the Web UI's repsonse time graph
+
+0.13.1
+======
+
+* Fixed crash bug on Python 3.8.0
+* Various other bug fixes and improvements.
+
+
+0.13.0
+======
+
 * New API for specifying wait time - https://github.com/locustio/locust/pull/1118
+
+  Example of the new API::
+
+      from locust import HttpLocust, between
+      class User(HttpLocust):
+          # wait between 5 and 30 seconds
+          wait_time = between(5, 30)
+
+  There are three built in :ref:`wait time functions <wait_time_functions>`: :py:func:`between <locust.wait_time.between>`,
+  :py:func:`constant <locust.wait_time.constant>` and :py:func:`constant_pacing <locust.wait_time.constant_pacing>`.
+
 * FastHttpLocust: Accept self signed SSL certificates, ignore host checks. Improved response code handling
 * Add current working dir to sys.path - https://github.com/locustio/locust/pull/484
 * Web UI improvements: Added 90th percentile to table, failure per seconds as a series in the chart
@@ -17,12 +523,12 @@ For full details of the Locust changelog, please see https://github.com/locustio
 * Various other bug fixes and improvements.
 
 0.12.2
-==========
+======
 
 * Added `--skip-log-setup` to disable Locust's default logging setup.
 * Added `--stop-timeout` to allow tasks to finish running their iteration before stopping
 * Added 99.9 and 99.99 percentile response times to csv output
-* Allow custom clients to set request response time to None. Those requests will be excluded 
+* Allow custom clients to set request response time to None. Those requests will be excluded
   when calculating median, average, min, max and percentile response times.
 * Renamed the last row in statistics table from "Total" to "Aggregated" (since the values aren't
   a sum of the individual table rows).
@@ -110,7 +616,7 @@ For full details of the Locust changelog, please see https://github.com/locustio
 * Fixed bug where POST requests (and other methods as well) got incorrectly reported as
   GET requests, if the request resulted in a redirect.
 * Added ability to download exceptions in CSV format. Download links has also been moved
-  to it's own tab in the web UI.
+  to its own tab in the web UI.
 
 
 0.7.2
@@ -163,7 +669,7 @@ msgpack for serializing master/slave data
 -----------------------------------------
 
 Locust now uses `msgpack <http://msgpack.org/>`_ for serializing data that is sent between
-a master node and it's slaves. This adresses a possible attack that can be used to execute
+a master node and its slaves. This addresses a possible attack that can be used to execute
 code remote, if one has access to the internal locust ports that are used for master-slave
 communication. The reason for this exploit was due to the fact that pickle was used.
 
@@ -210,7 +716,7 @@ Now RequestStats should be instantiated and holds the global stats, as well as a
 Removed support for avg_wait
 ----------------------------
 
-Previously one could specify avg_wait to :py:class:`TaskSet` and :py:class:`Locust` that Locust would try to strive to. However this can be sufficiently accomplished by using min_wait and max_wait for most use-cases. Therefore we've decided to remove the avg_wait as it's use-case is not clear or just too narrow to be in the Locust core.
+Previously one could specify avg_wait to :py:class:`TaskSet` and :py:class:`Locust` that Locust would try to strive to. However this can be sufficiently accomplished by using min_wait and max_wait for most use-cases. Therefore we've decided to remove the avg_wait as its use-case is not clear or just too narrow to be in the Locust core.
 
 Removed support for ramping
 ----------------------------

@@ -1,19 +1,26 @@
-FROM python:3.6-alpine as builder
+FROM python:3.9-slim as base
+FROM base as builder
 
-RUN apk --no-cache add g++ zeromq-dev
-COPY . /src
-WORKDIR /src
-RUN pip install .
+RUN apt update && apt install -y git 
 
-FROM python:3.6-alpine
+# there are no wheels for some packages (geventhttpclient?) for arm64/aarch64, so we need some build dependencies there
+RUN if [ -n "$(arch | grep 'arm64\|aarch64')" ]; then apt install -y --no-install-recommends gcc python3-dev; fi
 
-RUN apk --no-cache add zeromq && adduser -h / -s /bin/false -H -D locust
-COPY --from=builder /usr/local/lib/python3.6/site-packages /usr/local/lib/python3.6/site-packages
-COPY --from=builder /usr/local/bin/locust /usr/local/bin/locust
-COPY docker_start.sh docker_start.sh
-RUN chmod +x docker_start.sh
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-EXPOSE 8089 5557 5558
+COPY . /build
+RUN pip install /build/
 
+FROM base
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+# turn off python output buffering
+ENV PYTHONUNBUFFERED=1
+RUN useradd --create-home locust
+# ensure correct permissions
+RUN chown -R locust /opt/venv
 USER locust
-CMD ["./docker_start.sh"]
+WORKDIR /home/locust
+EXPOSE 8089 5557
+ENTRYPOINT ["locust"]

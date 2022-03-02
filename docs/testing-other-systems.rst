@@ -1,28 +1,50 @@
-===========================================
-Testing other systems using custom clients
-===========================================
+.. _testing-other-systems:
 
-Locust was built with HTTP as its main target. However, it can easily be extended to load test 
-any request/response based system, by writing a custom client that triggers 
-:py:attr:`request_success <locust.events.request_success>` and 
-:py:attr:`request_failure <locust.events.request_failure>` events.
+========================
+Testing non-HTTP systems
+========================
 
-Sample XML-RPC Locust client
-============================
+Locust only comes with built-in support for HTTP/HTTPS but it can be extended to test almost any system. This is normally done by wrapping the protocol library and triggering a :py:attr:`request <locust.event.Events.request>` event after each call has completed, to let Locust know what happened.
 
-Here is an example of a Locust class, **XmlRpcLocust**, which provides an XML-RPC client, 
-**XmlRpcClient**, and tracks all requests made:
+.. note::
+
+    It is important that the protocol libraries you use can be `monkey-patched <http://www.gevent.org/intro.html#monkey-patching>`_ by gevent. 
+    
+    Almost any libraries that are pure Python (using the Python ``socket`` module or some other standard library function like ``subprocess``) should work fine out of the box - but if they do their I/O calls in C gevent will be unable to patch it. This will block the whole Locust/Python process (in practice limiting you to running a single User per worker process)
+
+    Some C libraries allow for other workarounds. For example, if you want to use psycopg2 to performance test PostgreSQL, you can use `psycogreen <https://github.com/psycopg/psycogreen/>`_. If you are willing to get your hands dirty, you may also be able to do patch a library yourself, but that is beyond the scope of this documentation.
+
+Example: writing an XML-RPC User/client
+=======================================
+
+Lets assume we had an XML-RPC server that we wanted to load test
+
+.. literalinclude:: ../examples/custom_xmlrpc_client/server.py
+
+We can build a generic XML-RPC client, by wrapping :py:class:`xmlrpc.client.ServerProxy`
 
 .. literalinclude:: ../examples/custom_xmlrpc_client/xmlrpc_locustfile.py
 
-If you've written Locust tests before, you'll recognize the class called *ApiUser* which is a normal 
-Locust class that has a *TaskSet* class with *tasks* in its *task_set* attribute. However, the *ApiUser* 
-inherits from *XmlRpcLocust* that you can see right above ApiUser. The *XmlRpcLocust* class provides an 
-instance of XmlRpcClient under the *client* attribute. The *XmlRpcClient* is a wrapper around the standard 
-library's :py:class:`xmlrpclib.ServerProxy`. It  basically just proxies the function calls, but with the 
-important addition of firing :py:attr:`locust.events.request_success` and :py:attr:`locust.events.request_failure` 
-events, which will make all calls reported in Locust's statistics.
+Example: writing a gRPC User/client
+=======================================
 
-Here's an implementation of an XML-RPC server that would work as a server for the code above:
+If you have understood the XML-RPC example, you can easily build a `gRPC <https://github.com/grpc/grpc>`_ User.
 
-.. literalinclude:: ../examples/custom_xmlrpc_client/server.py
+The only significant difference is that you need to make gRPC gevent-compatible, by executing this code before opening the channel:
+
+.. code-block:: python
+
+    import grpc.experimental.gevent as grpc_gevent
+
+    grpc_gevent.init_gevent()
+
+Dummy server to test:
+
+.. literalinclude:: ../examples/grpc/hello_server.py
+
+gRPC client, base User and example usage:
+
+.. literalinclude:: ../examples/grpc/locustfile.py
+
+
+For more examples of user types, see `locust-plugins <https://github.com/SvenskaSpel/locust-plugins#users>`_ (it has users for WebSocket/SocketIO, Kafka, Selenium/WebDriver and more)
